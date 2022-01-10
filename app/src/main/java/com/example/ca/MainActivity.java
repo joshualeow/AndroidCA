@@ -25,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,11 +38,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<String> filenames;
     private int[] imgViews;
     private TextView progressText;
+    static Bitmap[] fetched;
+    static ArrayList<Bitmap> selected = new ArrayList<Bitmap>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        filenames = new ArrayList<String>();
         fetched = new Bitmap[20];
         progressBar = findViewById(R.id.progressBar);
         progressBar.setMax(COUNT);
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BufferedReader br = new BufferedReader(isr);
                 String data = br.readLine();
                 while (data != null) {
-                    html = html + data;
+                    html += data;
                     data = br.readLine();
                 }
                 br.close();
@@ -123,8 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             connection.setDoInput(true);
             connection.connect();
             InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
+            return BitmapFactory.decodeStream(input);
         } catch (IOException e) {
             return null;
         }
@@ -132,6 +132,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void clearCurrentImages() {
         Log.d("UserProcess", "clearing all images");
+        File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        for (String path : filenames) {
+            File file = new File(dir, path);
+            if (file.exists()) {
+                file.delete();
+            }
+            filenames = new ArrayList<String>();
+        }
         if (downloadingThread != null) {
             downloadingThread.interrupt();
             downloadingThread = null;
@@ -153,26 +161,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void downloadImages(String url) {
-        downloadingThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String html = getHtml(url);
-                ArrayList<String> pics = (ArrayList<String>) getImgSrc(html);
-                Bitmap[] fetched = new Bitmap[COUNT];
-                for (Bitmap bm : fetched) {
-                    bm = null;
-                }
-                int num = 0;
-                for (String pic : pics) {
-                    Bitmap bitmap = getBitmapFromURL(pic);
-                    if (bitmap != null) {
-                        fetched[num] = bitmap;
-                        num++;
-                        runOnUiThread(() -> {saveBitmapToFile(bitmap, pic);});
-                        runOnUiThread(new myRunnable(num, submitButton, fetched, progressBar));
-                        if (num == COUNT) {
-                            break;
-                        }
+        downloadingThread = new Thread(() -> {
+            String html = getHtml(url);
+            ArrayList<String> pics = (ArrayList<String>) getImgSrc(html);
+            Bitmap[] fetched = new Bitmap[COUNT];
+            for (Bitmap bm : fetched) {
+                bm = null;
+            }
+            int num = 0;
+            for (String pic : pics) {
+                Bitmap bitmap = getBitmapFromURL(pic);
+                if (bitmap != null) {
+                    fetched[num] = bitmap;
+                    num++;
+                    runOnUiThread(() -> saveBitmapToFile(bitmap, pic));
+                    runOnUiThread(new myRunnable(num, submitButton, fetched, progressBar));
+                    if (num == COUNT) {
+                        break;
                     }
                 }
             }
@@ -182,13 +187,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void saveBitmapToFile(Bitmap bm, String name) {
         try {
             File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File file = new File(dir, name.substring(name.lastIndexOf('/')));
-            if (file.exists()) {
-                file.delete();
-            }
+            String filename = name.substring(name.lastIndexOf('/'));
+            File file = new File(dir, filename);
             FileOutputStream out = new FileOutputStream(file);
             bm.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.close();
+            filenames.add(filename);
         }
         catch (Exception e) {
             Log.d("UserProcess", e.getMessage());
