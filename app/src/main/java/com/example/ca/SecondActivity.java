@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.widget.Chronometer;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class SecondActivity extends AppCompatActivity{
 
@@ -16,15 +17,21 @@ public class SecondActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        //Second activity - also has a grid but it is now 3x4
+
         //
         Chronometer simpleChronometer = (Chronometer) findViewById(R.id.timer); // initiate a chronometer
         simpleChronometer.start(); // start a chronometer
 
-        //Only 6 images passed to 2nd activity, allow users to choose
-        //Show that image has been selected.
-        //
+        //Second activity - also has a grid but it is now 3x4
         ArrayList<Bitmap> images = MainActivity.selected;
+
+//        for(Bitmap img: images){
+//            images.add(img);
+//        }
+//
+//        Random rn = new Random();
+//        int rand = rn.nextInt(12);
+
 
 
         //if selected same, both will stay as it is
