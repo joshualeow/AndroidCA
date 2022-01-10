@@ -38,14 +38,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<String> filenames;
     private int[] imgViews;
     private TextView progressText;
-    static Bitmap[] fetched;
+    //static Bitmap[] fetched;
     static ArrayList<Bitmap> selected = new ArrayList<Bitmap>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         filenames = new ArrayList<String>();
-        fetched = new Bitmap[20];
+        //fetched = new Bitmap[20];
         progressBar = findViewById(R.id.progressBar);
         progressBar.setMax(COUNT);
         submitButton = findViewById(R.id.btnSubmitUrl);
@@ -67,7 +67,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String url = et.getText().toString();
             clearCurrentImages();
             downloadImages(url);
+            clearCurrentSelected();
         }
+    }
+
+    public void clearCurrentSelected(){
+        selected = new ArrayList<>();
+        TextView tv = findViewById(R.id.txtNumberSelected);
+        tv.setText("");
     }
 
     public List<String> getImgSrc(String htmlStr) {
