@@ -26,12 +26,17 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
+    static Bitmap[] fetched;
+    static ArrayList<Bitmap> selected = new ArrayList<>();
+
     private  ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fetched = new Bitmap[20];
         progressBar = findViewById(R.id.progressBar);
         progressBar.setMax(20);
 
@@ -45,9 +50,12 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        //get the html page as String
                         String html = getHtml(url);
+                        //get the image urls as a list of String
                         ArrayList<String> pics = (ArrayList<String>) getImgSrc(html);
-                        Bitmap[] fetched = new Bitmap[20];
+                        //get the first 20 images (in bgThread) to store in fetched:Bitmap[]
+                        //meanwhile render the UI (in mainThread)
                         for(Bitmap bm: fetched){
                             bm = null;
                         }

@@ -1,5 +1,6 @@
 package com.example.ca;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,6 +27,24 @@ public class myRunnable implements Runnable{
         progressBar.setProgress(i);
         TextView tv = v.getRootView().findViewById(R.id.txtProgress);
         tv.setText(i + " out of 20 downloaded");
+
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(MainActivity.selected.size() < 6){
+                    Bitmap bm = fetched[i];
+                    if(!MainActivity.selected.contains(bm)){
+                        MainActivity.selected.add(bm);
+                        TextView tv = v.getRootView().findViewById(R.id.txtNumberSelected);
+                        tv.setText(MainActivity.selected.size()+" selected");
+                    }
+                }
+                else {
+                    Intent intent = new Intent(v.getContext(), SecondActivity.class);
+                    v.getContext().startActivity(intent);
+                }
+            }
+        });
     }
 
     public  ImageView getImageView(View v, int i){
